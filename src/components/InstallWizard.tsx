@@ -990,7 +990,7 @@ DECLARE v_product JSONB; v_stock INT;
 BEGIN
   SELECT data INTO v_product FROM products WHERE id = p_id FOR UPDATE;
   IF NOT FOUND THEN RETURN NULL; END IF;
-  v_stock := (v_product->>'stock')::INT;
+  v_stock := COALESCE(NULLIF(v_product->>'stock','')::numeric, 0)::INT;
   IF v_stock < p_qty THEN RETURN NULL; END IF;
   v_product := jsonb_set(v_product, '{stock}', to_jsonb(v_stock - p_qty));
   UPDATE products SET data = v_product WHERE id = p_id;
